@@ -1057,6 +1057,33 @@ var (
 	}
 )
 
+// Indexooor related flags
+var (
+	IndexooorFlag = &cli.BoolFlag{
+		Name:     "indexooor.index",
+		Usage:    "Flag to enable indexing service",
+		Value:    false,
+		Category: flags.IndexooorCategory,
+	}
+	ContractAddressesFlag = &cli.StringSliceFlag{
+		Name:     "indexooor.contract-addresses",
+		Usage:    "Comma separated contract addresses to index",
+		Category: flags.IndexooorCategory,
+	}
+	StartBlockFlag = &cli.Uint64Flag{
+		Name:     "indexooor.start-block",
+		Usage:    "Block to start indexing from",
+		Value:    0,
+		Category: flags.IndexooorCategory,
+	}
+	RunIdFlag = &cli.Uint64Flag{
+		Name:     "indexooor.run-id",
+		Usage:    "Run ID to start inxeding from block where left off",
+		Value:    0,
+		Category: flags.IndexooorCategory,
+	}
+)
+
 func init() {
 	if rawdb.PebbleEnabled {
 		DatabasePathFlags = append(DatabasePathFlags, DBEngineFlag)

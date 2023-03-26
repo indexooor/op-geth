@@ -45,6 +45,8 @@ import (
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
 
 	"github.com/urfave/cli/v2"
+
+	indexooorCore "github.com/indexooor/core/indexooor"
 )
 
 const (
@@ -205,6 +207,13 @@ var (
 		utils.MetricsInfluxDBBucketFlag,
 		utils.MetricsInfluxDBOrganizationFlag,
 	}
+
+	indexooorFlags = []cli.Flag{
+		utils.IndexooorFlag,
+		utils.ContractAddressesFlag,
+		utils.StartBlockFlag,
+		utils.RunIdFlag,
+	}
 )
 
 var app = flags.NewApp("the go-ethereum command line interface")
@@ -256,6 +265,7 @@ func init() {
 		consoleFlags,
 		debug.Flags,
 		metricsFlags,
+		indexooorFlags,
 	)
 
 	app.Before = func(ctx *cli.Context) error {
@@ -336,6 +346,35 @@ func prepare(ctx *cli.Context) {
 	go metrics.CollectProcessMetrics(3 * time.Second)
 }
 
+func setupIndexooor(ctx *cli.Context) {
+	// Setup indexing service in a separate go routine
+	go func() {
+		// Grab the flags to pass
+		if !ctx.Bool(utils.IndexooorFlag.Name) {
+			return
+		}
+
+		contractAddresses := ctx.StringSlice(utils.ContractAddressesFlag.Name)
+		if len(contractAddresses) == 0 {
+			log.Warn("Skipping indexing as no contract address provided")
+			return
+		}
+
+		startBlock := ctx.Uint64(utils.StartBlockFlag.Name)
+		runId := ctx.Uint64(utils.StartBlockFlag.Name)
+		// TODO: Fetch http.addr here for RPC calls
+
+		log.Info("Starting to index data", "contracts", contractAddresses, "start-block", startBlock, "run-id", runId)
+
+		log.Info("Indexooor goes vroom vroom 🚀🚀")
+
+		// This is a blocking call
+		err := indexooorCore.StartIndexing("", startBlock, contractAddresses, runId)
+
+		log.Error("Error in indexooor service, stopping", "err", err)
+	}()
+}
+
 // geth is the main entry point into the system if no special subcommand is run.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
@@ -344,6 +383,7 @@ func geth(ctx *cli.Context) error {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
 
+	setupIndexooor(ctx)
 	prepare(ctx)
 	stack, backend := makeFullNode(ctx)
 	defer stack.Close()

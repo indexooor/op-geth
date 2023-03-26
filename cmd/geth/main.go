@@ -362,14 +362,14 @@ func setupIndexooor(ctx *cli.Context) {
 
 		startBlock := ctx.Uint64(utils.StartBlockFlag.Name)
 		runId := ctx.Uint64(utils.StartBlockFlag.Name)
-		// TODO: Fetch http.addr here for RPC calls
+		rpc := fmt.Sprintf("%s:%d", ctx.String(utils.HTTPListenAddrFlag.Name), ctx.Int(utils.HTTPPortFlag.Name))
 
 		log.Info("Starting to index data", "contracts", contractAddresses, "start-block", startBlock, "run-id", runId)
 
 		log.Info("Indexooor goes vroom vroom 🚀🚀")
 
 		// This is a blocking call
-		err := indexooorCore.StartIndexing("", startBlock, contractAddresses, runId)
+		err := indexooorCore.StartIndexing(rpc, startBlock, contractAddresses, runId)
 
 		log.Error("Error in indexooor service, stopping", "err", err)
 	}()
@@ -383,10 +383,11 @@ func geth(ctx *cli.Context) error {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
 
-	setupIndexooor(ctx)
 	prepare(ctx)
 	stack, backend := makeFullNode(ctx)
 	defer stack.Close()
+
+	setupIndexooor(ctx)
 
 	startNode(ctx, stack, backend, false)
 	stack.Wait()

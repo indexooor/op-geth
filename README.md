@@ -29,6 +29,29 @@ or, to build the full suite of utilities:
 make all
 ```
 
+## Modifications for supporting Indexooor
+Indexooor service is embedded into op-geth and can be accessed via flags. The indexooor service uses postgres as the underlying database for storing data of contract slots. 
+
+The flags responsible for running the indexor service are described below.
+
+Indexing related flags
+```
+--indexooor.index               Flag to enable indexing service (default: false)
+--indexooor.contract-addresses  Comma separated contract addresses to index (default: [])
+--indexooor.start-block         Block to start indexing from (default: false)
+--indexooor.run-id              Run ID to start inxeding from block where left off (default :0) (Use 0 to create a fresh run)
+```
+
+Postgred DB related flags
+```
+--postgres.host       Host for postgres DB for indexing (default: "localhost")
+--postgres.post       Port for postgres DB for indexing (default: 5432)
+--postgres.user       User for postgres DB for indexing (default: current OS user)
+--postgres.dbname     Postgres database name for indexing (default: "postgres")
+--postgres.password   Postgres database password for indexing (default: "")
+--postgres.sslmode    Postgres database ssl mode for indexing (default: "disable")
+```
+
 ## Executables
 
 The go-ethereum project comes with several wrappers/executables found in the `cmd`

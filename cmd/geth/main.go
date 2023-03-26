@@ -46,6 +46,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	indexooorDb "github.com/indexooor/core/db"
 	indexooorCore "github.com/indexooor/core/indexooor"
 )
 
@@ -213,6 +214,12 @@ var (
 		utils.ContractAddressesFlag,
 		utils.StartBlockFlag,
 		utils.RunIdFlag,
+		utils.PostgresHost,
+		utils.PostgresPort,
+		utils.PostgresUser,
+		utils.PostgresDBName,
+		utils.PostgresDBPassword,
+		utils.PostgresDBSslmode,
 	}
 )
 
@@ -364,6 +371,9 @@ func setupIndexooor(ctx *cli.Context) {
 		runId := ctx.Uint64(utils.StartBlockFlag.Name)
 		rpc := fmt.Sprintf("http://%s:%d", ctx.String(utils.HTTPListenAddrFlag.Name), ctx.Int(utils.HTTPPortFlag.Name))
 
+		// Grab the postgres DB related flags
+		config := getPostgresDBConfig(ctx)
+
 		// Wait for http server to get started
 		time.Sleep(5 * time.Second)
 
@@ -372,10 +382,21 @@ func setupIndexooor(ctx *cli.Context) {
 		log.Info("Indexooor goes vroom vroom 🚀🚀")
 
 		// This is a blocking call
-		err := indexooorCore.StartIndexing(rpc, startBlock, contractAddresses, runId)
+		err := indexooorCore.StartIndexing(rpc, startBlock, contractAddresses, runId, config)
 
 		log.Error("Error in indexooor service, stopping", "err", err)
 	}()
+}
+
+func getPostgresDBConfig(ctx *cli.Context) *indexooorDb.DBConfig {
+	return &indexooorDb.DBConfig{
+		Host:     ctx.String(utils.PostgresHost.Name),
+		Port:     ctx.Uint64(utils.PostgresPort.Name),
+		User:     ctx.String(utils.PostgresUser.Name),
+		Dbname:   ctx.String(utils.PostgresDBName.Name),
+		Password: ctx.String(utils.PostgresDBPassword.Name),
+		Sslmode:  ctx.String(utils.PostgresDBSslmode.Name),
+	}
 }
 
 // geth is the main entry point into the system if no special subcommand is run.

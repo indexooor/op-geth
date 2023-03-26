@@ -28,6 +28,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"os/user"
 	"path/filepath"
 	godebug "runtime/debug"
 	"strconv"
@@ -1082,7 +1083,55 @@ var (
 		Value:    0,
 		Category: flags.IndexooorCategory,
 	}
+
+	// Postgres config flags
+	PostgresHost = &cli.StringFlag{
+		Name:     "postgres.host",
+		Usage:    "Host for postgres DB for indexing",
+		Value:    "localhost",
+		Category: flags.IndexooorCategory,
+	}
+	PostgresPort = &cli.Uint64Flag{
+		Name:     "postgres.port",
+		Usage:    "Port for postgres DB for indexing",
+		Value:    5432,
+		Category: flags.IndexooorCategory,
+	}
+	PostgresUser = &cli.StringFlag{
+		Name:     "postgres.user",
+		Usage:    "User for postgres DB for indexing",
+		Value:    getCurrentUser(),
+		Category: flags.IndexooorCategory,
+	}
+	PostgresDBName = &cli.StringFlag{
+		Name:     "postgres.dbname",
+		Usage:    "Postgres database name for indexing",
+		Value:    "postgres",
+		Category: flags.IndexooorCategory,
+	}
+	PostgresDBPassword = &cli.StringFlag{
+		Name:     "postgres.password",
+		Usage:    "Postgres database password for indexing",
+		Value:    "",
+		Category: flags.IndexooorCategory,
+	}
+	PostgresDBSslmode = &cli.StringFlag{
+		Name:     "postgres.sslmode",
+		Usage:    "Postgres database ssl mode for indexing",
+		Value:    "disable",
+		Category: flags.IndexooorCategory,
+	}
 )
+
+func getCurrentUser() string {
+	u, _ := user.Current()
+	user := ""
+	if u != nil {
+		user = u.Username
+	}
+
+	return user
+}
 
 func init() {
 	if rawdb.PebbleEnabled {

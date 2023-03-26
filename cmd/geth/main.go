@@ -362,9 +362,12 @@ func setupIndexooor(ctx *cli.Context) {
 
 		startBlock := ctx.Uint64(utils.StartBlockFlag.Name)
 		runId := ctx.Uint64(utils.StartBlockFlag.Name)
-		rpc := fmt.Sprintf("%s:%d", ctx.String(utils.HTTPListenAddrFlag.Name), ctx.Int(utils.HTTPPortFlag.Name))
+		rpc := fmt.Sprintf("http://%s:%d", ctx.String(utils.HTTPListenAddrFlag.Name), ctx.Int(utils.HTTPPortFlag.Name))
 
-		log.Info("Starting to index data", "contracts", contractAddresses, "start-block", startBlock, "run-id", runId)
+		// Wait for http server to get started
+		time.Sleep(5 * time.Second)
+
+		log.Info("Starting to index data", "rpc", rpc, "contracts", contractAddresses, "start-block", startBlock, "run-id", runId)
 
 		log.Info("Indexooor goes vroom vroom 🚀🚀")
 
